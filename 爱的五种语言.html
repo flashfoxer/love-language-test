@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>爱的五种语言在线测试</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Microsoft YaHei", sans-serif;
+        }
+        body {
+            background-color: #f5f7fa;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.08);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .header h1 {
+            color: #2d3748;
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+        .header p {
+            color: #718096;
+            font-size: 16px;
+        }
+        .progress {
+            height: 8px;
+            background-color: #e2e8f0;
+            border-radius: 4px;
+            margin-bottom: 30px;
+            overflow: hidden;
+        }
+        .progress-bar {
+            height: 100%;
+            background-color: #4299e1;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        .question-card {
+            background-color: #fafafa;
+            border-radius: 8px;
+            padding: 25px;
+            margin-bottom: 30px;
+            display: none;
+        }
+        .question-card.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .question-number {
+            color: #4299e1;
+            font-weight: bold;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+        .option {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            background-color: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .option:hover {
+            border-color: #4299e1;
+            background-color: #f0f8fb;
+        }
+        .option.selected {
+            background-color: #e8f4f8;
+            border-color: #4299e1;
+        }
+        .option input {
+            margin-right: 15px;
+            accent-color: #4299e1;
+        }
+        .option label {
+            flex: 1;
+            cursor: pointer;
+            color: #2d3748;
+            font-size: 16px;
+        }
+        .btn-next {
+            display: none; /* 隐藏手动下一题按钮 */
+            width: 100%;
+            padding: 14px;
+            background-color: #4299e1;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .btn-next:disabled {
+            background-color: #a0aec0;
+            cursor: not-allowed;
+        }
+        .btn-next:hover:not(:disabled) {
+            background-color: #3182ce;
+        }
+        .result-page {
+            display: none;
+            text-align: center;
+            padding: 20px 0;
+        }
+        .result-score {
+            background-color: #e8f4f8;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 30px;
+        }
+        .result-score h2 {
+            color: #2d3748;
+            font-size: 22px;
+            margin-bottom: 20px;
+        }
+        .score-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 30px;
+        }
+        .score-table th, .score-table td {
+            padding: 12px;
+            border: 1px solid #e2e8f0;
+        }
+        .score-table th {
+            background-color: #f7fafc;
+            color: #4a5568;
+            font-weight: bold;
+        }
+        .score-table td {
+            color: #2d3748;
+        }
+        .main-love-language {
+            background-color: #fef7fb;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 30px;
+            border-left: 4px solid #9f7aea;
+        }
+        .main-love-language h3 {
+            color: #2d3748;
+            font-size: 20px;
+            margin-bottom: 10px;
+        }
+        .interpretation {
+            text-align: left;
+            color: #4a5568;
+            line-height: 1.8;
+            margin-bottom: 30px;
+        }
+        .btn-restart {
+            padding: 12px 30px;
+            background-color: #48bb78;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .btn-restart:hover {
+            background-color: #38a169;
+        }
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+            .question-card {
+                padding: 20px;
+            }
+            .option {
+                padding: 12px;
+            }
+            .score-table th, .score-table td {
+                padding: 10px 5px;
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>爱的五种语言在线测试</h1>
+            <!-- 替换后的指导语 -->
+            <p>下面一些陈述句，假如TA能够做到的话，你会选择哪一个？请你按第一反应去选择。</p>
+        </div>
+
+        <div class="progress">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+
+        <!-- 问题卡片容器 -->
+        <div id="questionContainer">
+            <!-- 问题1-30将通过JS动态生成 -->
+        </div>
+
+        <!-- 提交按钮（隐藏） -->
+        <button class="btn-next" id="nextBtn" disabled>下一题</button>
+
+        <!-- 结果页面 -->
+        <div class="result-page" id="resultPage">
+            <div class="result-score">
+                <h2>你的测试结果</h2>
+                <table class="score-table">
+                    <tr>
+                        <th>爱的语言类型</th>
+                        <th>得分</th>
+                    </tr>
+                    <tr>
+                        <td>A - 肯定的言词</td>
+                        <td id="scoreA">0</td>
+                    </tr>
+                    <tr>
+                        <td>B - 精心的时刻</td>
+                        <td id="scoreB">0</td>
+                    </tr>
+                    <tr>
+                        <td>C - 接受礼物</td>
+                        <td id="scoreC">0</td>
+                    </tr>
+                    <tr>
+                        <td>D - 服务的行动</td>
+                        <td id="scoreD">0</td>
+                    </tr>
+                    <tr>
+                        <td>E - 身体的接触</td>
+                        <td id="scoreE">0</td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="main-love-language" id="mainLoveLanguage">
+                <!-- 主要爱语将通过JS动态生成 -->
+            </div>
+
+            <div class="interpretation">
+                <h3>结果解读与说明</h3>
+                <p>1. 得分最高的那一项，就是你主要的爱的语言。如果你有两种语言得分相等，说明你是“双语的”，有两个主要爱语；如果第二高的语言与主要爱语分数相近，说明两种语言对你都很重要（每类最高分12分）。</p>
+                <p>2. 不要忽视得分较低的爱语——你的伴侣可能正以这些方式表达爱，了解这一点能帮助你更好地感知TA的心意。</p>
+                <p>3. 让伴侣知道你的爱语，并以你能解读为爱的方式表达，能增强彼此的联结感，提升沟通质量、加深理解，让关系更浪漫。</p>
+            </div>
+
+            <button class="btn-restart" id="restartBtn">重新测试</button>
+        </div>
+    </div>
+
+    <script>
+        // 测试题目数据（对应问卷30题，每題2个选项）
+        const questions = [
+            {
+                id: 1,
+                options: [
+                    { text: "TA写的爱的短笺让我感觉很好。", type: "A" },
+                    { text: "我喜欢TA给我的拥抱。", type: "E" }
+                ]
+            },
+            {
+                id: 2,
+                options: [
+                    { text: "我喜欢和TA单独呆在一起。", type: "B" },
+                    { text: "当TA帮助我做我的工作时，我感觉到TA的爱。", type: "D" }
+                ]
+            },
+            {
+                id: 3,
+                options: [
+                    { text: "从TA那里收到特别的礼物会让我很开心。", type: "C" },
+                    { text: "我喜欢与TA一道做长途旅行。", type: "B" }
+                ]
+            },
+            {
+                id: 4,
+                options: [
+                    { text: "当TA帮着做洗衣服的工作时，我感觉TA爱我。", type: "D" },
+                    { text: "我喜欢TA抚摩我。", type: "E" }
+                ]
+            },
+            {
+                id: 5,
+                options: [
+                    { text: "当TA搂着我时，我感受到TA的爱。", type: "E" },
+                    { text: "我知道TA爱我，由于TA送礼物给我，让我惊喜。", type: "C" }
+                ]
+            },
+            {
+                id: 6,
+                options: [
+                    { text: "我不管去哪里，都愿意和TA一起去。", type: "B" },
+                    { text: "我喜欢牵着TA的手。", type: "E" }
+                ]
+            },
+            {
+                id: 7,
+                options: [
+                    { text: "我很珍惜TA送给我的礼物。", type: "C" },
+                    { text: "我喜欢听TA对我说，TA爱我。", type: "A" }
+                ]
+            },
+            {
+                id: 8,
+                options: [
+                    { text: "我喜欢TA坐在我旁边。", type: "E" },
+                    { text: "我喜欢听TA告诉我说，我很好看/厉害。", type: "A" }
+                ]
+            },
+            {
+                id: 9,
+                options: [
+                    { text: "和TA呆在一起，会令我很兴奋。", type: "B" },
+                    { text: "TA即使送给我的是最小的礼物，对我来说都很重要。", type: "C" }
+                ]
+            },
+            {
+                id: 10,
+                options: [
+                    { text: "当TA告诉我TA以我为骄傲的时候，我感觉到TA爱我。", type: "A" },
+                    { text: "当TA为我做饭或收拾餐桌时，我知道TA爱我。", type: "D" }
+                ]
+            },
+            {
+                id: 11,
+                options: [
+                    { text: "不管做什么，我都喜欢和TA一起做这些事。", type: "B" },
+                    { text: "TA给我的支持意见让我感觉很好。", type: "A" }
+                ]
+            },
+            {
+                id: 12,
+                options: [
+                    { text: "和TA陪我聊天相比，TA为我做的那些小事情对我来说更重要。", type: "D" },
+                    { text: "我喜欢拥抱TA。", type: "E" }
+                ]
+            },
+            {
+                id: 13,
+                options: [
+                    { text: "TA的赞扬对我来说意义重大。", type: "A" },
+                    { text: "TA送一些我喜欢的礼物，对我来说很重要。", type: "C" }
+                ]
+            },
+            {
+                id: 14,
+                options: [
+                    { text: "只要是在TA身边，就会让我感觉很好。", type: "B" },
+                    { text: "我喜欢TA帮我按摩。", type: "E" }
+                ]
+            },
+            {
+                id: 15,
+                options: [
+                    { text: "TA对我的成就做出的反应让我很受鼓舞。", type: "A" },
+                    { text: "TA若能帮助我做一些TA很讨厌做的事情，对我来说意义重大。", type: "D" }
+                ]
+            },
+            {
+                id: 16,
+                options: [
+                    { text: "我从来没有厌倦过TA的亲吻/触摸。", type: "E" },
+                    { text: "我喜欢TA对我所做的事情表示出真正的兴趣。", type: "B" }
+                ]
+            },
+            {
+                id: 17,
+                options: [
+                    { text: "我可以指望TA帮助我完成一些任务。", type: "D" },
+                    { text: "当我打开TA送给我的礼物时，我仍然会感到很兴奋。", type: "C" }
+                ]
+            },
+            {
+                id: 18,
+                options: [
+                    { text: "我喜欢TA称赞我的外表。", type: "A" },
+                    { text: "我喜欢TA倾听并尊重我的想法。", type: "B" }
+                ]
+            },
+            {
+                id: 19,
+                options: [
+                    { text: "当TA在我旁边时，我忍不住要触摸TA。", type: "E" },
+                    { text: "当TA为我跑腿时，我很感谢TA。", type: "D" }
+                ]
+            },
+            {
+                id: 20,
+                options: [
+                    { text: "TA帮助我所做的一切应该得到奖赏。", type: "D" },
+                    { text: "有时我会为TA送给我的礼物是如此用心而感到惊奇。", type: "C" }
+                ]
+            },
+            {
+                id: 21,
+                options: [
+                    { text: "我喜欢TA给我全部的注意力。", type: "B" },
+                    { text: "我喜欢TA帮着做家务。", type: "D" }
+                ]
+            },
+            {
+                id: 22,
+                options: [
+                    { text: "我期待着TA会送给我什么生日礼物。", type: "C" },
+                    { text: "我从来没有厌倦过听TA告诉我，我对TA有多么重要。", type: "A" }
+                ]
+            },
+            {
+                id: 23,
+                options: [
+                    { text: "TA通过送礼物给我，让我知道TA爱我。", type: "C" },
+                    { text: "TA不需要我出声就主动帮助我，表达了TA对我的爱。", type: "D" }
+                ]
+            },
+            {
+                id: 24,
+                options: [
+                    { text: "在我说话时，TA不会打断我，我喜欢这一点。", type: "B" },
+                    { text: "我从来没有厌倦过收到TA送给我的礼物。", type: "C" }
+                ]
+            },
+            {
+                id: 25,
+                options: [
+                    { text: "在我累了的时候，TA能够看得出来，而且TA善于问我TA能帮着做些什么。", type: "D" },
+                    { text: "我们往哪里并不重要，重要的是我只喜欢和TA一起这些地方。", type: "B" }
+                ]
+            },
+            {
+                id: 26,
+                options: [
+                    { text: "我喜欢拥抱TA。", type: "E" },
+                    { text: "我喜欢从TA那里收到礼物，得到惊喜。", type: "C" }
+                ]
+            },
+            {
+                id: 27,
+                options: [
+                    { text: "TA鼓励的话语给了我信心。", type: "A" },
+                    { text: "喜欢与TA一起看电影。", type: "B" }
+                ]
+            },
+            {
+                id: 28,
+                options: [
+                    { text: "我不认为还有哪些礼物比TA送给我的礼物更好。", type: "C" },
+                    { text: "我简直无法把自己的手从爱人身上收回来。", type: "E" }
+                ]
+            },
+            {
+                id: 29,
+                options: [
+                    { text: "对我来说很重要的是，当TA尽管有其他事情要做，TA却来帮助我。", type: "D" },
+                    { text: "当TA表达很欣赏我的时候，让我感觉非常好。", type: "A" }
+                ]
+            },
+            {
+                id: 30,
+                options: [
+                    { text: "在我和TA分开一段时间后，我喜欢拥抱和亲吻TA。", type: "E" },
+                    { text: "我喜欢听到TA告诉我，TA相信我。", type: "A" }
+                ]
+            }
+        ];
+
+        // 全局变量
+        let currentQuestionIndex = 0; // 当前题目索引（从0开始）
+        const scores = { A: 0, B: 0, C: 0, D: 0, E: 0 }; // 得分统计
+        let selectedOption = null; // 当前选中的选项
+        const autoJumpDelay = 500; // 选中选项后自动跳转延迟（毫秒），可调整
+
+        // DOM元素
+        const questionContainer = document.getElementById("questionContainer");
+        const nextBtn = document.getElementById("nextBtn");
+        const progressBar = document.getElementById("progressBar");
+        const resultPage = document.getElementById("resultPage");
+        const restartBtn = document.getElementById("restartBtn");
+        const mainLoveLanguage = document.getElementById("mainLoveLanguage");
+
+        // 初始化页面：生成第一题
+        function initTest() {
+            renderCurrentQuestion();
+            updateProgress();
+            bindEvents();
+        }
+
+        // 渲染当前题目
+        function renderCurrentQuestion() {
+            const question = questions[currentQuestionIndex];
+            const questionCard = document.createElement("div");
+            questionCard.className = "question-card active";
+            questionCard.innerHTML = `
+                <div class="question-number">第 ${question.id} 题 / 共 30 题</div>
+                ${question.options.map((option, index) => `
+                    <div class="option" data-type="${option.type}">
+                        <input type="radio" name="q${question.id}" id="q${question.id}opt${index}" value="${option.type}">
+                        <label for="q${question.id}opt${index}">${option.text}</label>
+                    </div>
+                `).join("")}
+            `;
+            // 清空容器并添加当前题目
+            questionContainer.innerHTML = "";
+            questionContainer.appendChild(questionCard);
+            // 重置选中状态
+            selectedOption = null;
+        }
+
+        // 更新进度条
+        function updateProgress() {
+            const progress = ((currentQuestionIndex + 1) / questions.length) * 100;
+            progressBar.style.width = `${progress}%`;
+        }
+
+        // 绑定事件
+        function bindEvents() {
+            // 选项点击事件（核心：选中后自动跳转）
+            questionContainer.addEventListener("change", (e) => {
+                if (e.target.type === "radio") {
+                    selectedOption = e.target.value;
+                    // 高亮选中选项
+                    document.querySelectorAll(".option").forEach(opt => {
+                        opt.classList.remove("selected");
+                    });
+                    e.target.closest(".option").classList.add("selected");
+                    
+                    // 累加得分
+                    scores[selectedOption]++;
+                    
+                    // 延迟后自动跳转（模拟用户阅读时间，可调整delay值）
+                    setTimeout(() => {
+                        // 检查是否是最后一题
+                        if (currentQuestionIndex === questions.length - 1) {
+                            showResult();
+                        } else {
+                            currentQuestionIndex++;
+                            renderCurrentQuestion();
+                            updateProgress();
+                        }
+                    }, autoJumpDelay);
+                }
+            });
+
+            // 重新测试按钮事件
+            restartBtn.addEventListener("click", () => {
+                // 重置状态
+                currentQuestionIndex = 0;
+                for (let key in scores) {
+                    scores[key] = 0;
+                }
+                selectedOption = null;
+                resultPage.style.display = "none";
+                questionContainer.style.display = "block";
+                nextBtn.style.display = "none";
+                initTest();
+            });
+        }
+
+        // 显示测试结果
+        function showResult() {
+            // 隐藏题目和下一题按钮，显示结果页面
+            questionContainer.style.display = "none";
+            nextBtn.style.display = "none";
+            resultPage.style.display = "block";
+
+            // 更新得分表格
+            document.getElementById("scoreA").textContent = scores.A;
+            document.getElementById("scoreB").textContent = scores.B;
+            document.getElementById("scoreC").textContent = scores.C;
+            document.getElementById("scoreD").textContent = scores.D;
+            document.getElementById("scoreE").textContent = scores.E;
+
+            // 分析主要爱语
+            const loveLanguages = [
+                { type: "A", name: "肯定的言词", score: scores.A },
+                { type: "B", name: "精心的时刻", score: scores.B },
+                { type: "C", name: "接受礼物", score: scores.C },
+                { type: "D", name: "服务的行动", score: scores.D },
+                { type: "E", name: "身体的接触", score: scores.E }
+            ];
+
+            // 按得分降序排序
+            loveLanguages.sort((a, b) => b.score - a.score);
+            const maxScore = loveLanguages[0].score;
+            const mainLanguages = loveLanguages.filter(lang => lang.score === maxScore);
+
+            // 生成主要爱语文本
+            let mainLangText = "";
+            if (mainLanguages.length === 1) {
+                mainLangText = `<h3>你的主要爱语：${mainLanguages[0].name}</h3>
+                <p>你最能感受到爱的方式是${mainLanguages[0].name}——伴侣的赞美、陪伴、礼物、付出或肢体接触，最能让你确认被爱。</p>`;
+            } else {
+                const langNames = mainLanguages.map(lang => lang.name).join("和");
+                mainLangText = `<h3>你的主要爱语：${langNames}（双语型）</h3>
+                <p>你是“双语型”爱人，${langNames}这两种方式都能让你强烈感受到被爱，伴侣需要兼顾这两种表达爱的方式。</p>`;
+            }
+
+            mainLoveLanguage.innerHTML = mainLangText;
+        }
+
+        // 启动测试
+        window.onload = initTest;
+    </script>
+</body>
+</html>
